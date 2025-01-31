@@ -134,22 +134,23 @@ server <- function(input, output, session) {
   output$stats_table <- renderTable({
     req(portfolio())
     
-    # Get frontier series
-    frontier <- getFrontier(portfolio())
+    # Get the optimal portfolio data
+    pfolio <- portfolio()
     
-    # Calculate statistics from the tangency portfolio
-    if (is.matrix(frontier@portfolio)) {
-      # Get the last row (tangency portfolio)
-      idx <- nrow(frontier@portfolio)
-      ret <- frontier@portfolio[idx, "mu"]
-      risk <- frontier@portfolio[idx, "Sigma"]
-      sharpe <- (ret - getSpec()@model$riskFreeRate) / risk
+    # Extract return and risk from the optimal portfolio
+    if ("tangencyPortfolio" %in% slotNames(pfolio)) {
+      # For frontier portfolios, use tangency portfolio
+      ret <- pfolio@tangencyPortfolio@portfolio$mu
+      risk <- pfolio@tangencyPortfolio@portfolio$Sigma
     } else {
-      # Single portfolio case
-      ret <- frontier@portfolio["mu"]
-      risk <- frontier@portfolio["Sigma"]
-      sharpe <- (ret - getSpec()@model$riskFreeRate) / risk
+      # For single portfolios (like minvariance)
+      ret <- pfolio@portfolio$mu
+      risk <- pfolio@portfolio$Sigma
     }
+    
+    # Calculate Sharpe ratio
+    rf_rate <- getSpec()@model$riskFreeRate
+    sharpe <- (ret - rf_rate) / risk
     
     # Annualize statistics
     data.frame(
