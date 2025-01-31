@@ -88,10 +88,18 @@ server <- function(input, output, session) {
     data <- getData()
     spec <- getSpec()
     
-    # Create constraints string
-    constraints <- paste0("minW[1:length(input$stocks)]=", input$min_weight,
-                         "; maxW[1:length(input$stocks)]=", input$max_weight,
-                         "; sum(weights)=1")
+    # Create constraint vectors
+    n_assets <- ncol(data)
+    min_weights <- rep(input$min_weight, n_assets)
+    max_weights <- rep(input$max_weight, n_assets)
+    
+    # Build constraints using the constraint vectors
+    constraints <- portfolioConstraints(
+      data,
+      LB = min_weights,
+      UB = max_weights,
+      sumW = 1
+    )
     
     # Perform optimization
     tryCatch({
