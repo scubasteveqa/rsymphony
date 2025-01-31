@@ -70,19 +70,14 @@ server <- function(input, output, session) {
     spec <- portfolioSpec()
     
     # Modify specification settings directly
-    spec@nFrontierPoints <- 25
-    spec@risk <- list(
-      risk = "Cov",
-      riskFreeRate = 0.02,
-      riskAversion = input$risk_aversion
-    )
-    spec@optimizer <- list(
-      type = "solveRsymphony",
-      control = list(
-        solver = "symphony",
-        maxiter = 1000,
-        trace = TRUE
-      )
+    spec@model$nFrontierPoints <- 25
+    spec@model$riskFreeRate <- 0.02
+    spec@model$riskAversion <- input$risk_aversion
+    spec@model$optimizer <- "solveRsymphony"
+    spec@model$optControl <- list(
+      solver = "symphony",
+      maxiter = 1000,
+      trace = TRUE
     )
     
     spec
