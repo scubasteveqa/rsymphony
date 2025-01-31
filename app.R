@@ -140,12 +140,12 @@ server <- function(input, output, session) {
     # Extract return and risk from the optimal portfolio
     if ("tangencyPortfolio" %in% slotNames(pfolio)) {
       # For frontier portfolios, use tangency portfolio
-      ret <- pfolio@tangencyPortfolio@portfolio$mu
-      risk <- pfolio@tangencyPortfolio@portfolio$Sigma
+      ret <- getTargetReturn(pfolio@tangencyPortfolio)
+      risk <- getTargetRisk(pfolio@tangencyPortfolio)
     } else {
       # For single portfolios (like minvariance)
-      ret <- pfolio@portfolio$mu
-      risk <- pfolio@portfolio$Sigma
+      ret <- getTargetReturn(pfolio)
+      risk <- getTargetRisk(pfolio)
     }
     
     # Calculate Sharpe ratio
