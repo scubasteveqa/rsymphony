@@ -88,14 +88,13 @@ server <- function(input, output, session) {
     data <- getData()
     spec <- getSpec()
     
-    # Set up constraints
-    n_assets <- ncol(data)
-    constraints <- sprintf(
-      "minW[%s] = %s; maxW[%s] = %s; minsumW = 1; maxsumW = 1",
-      paste(rep("1", n_assets), collapse = ","),
-      input$min_weight,
-      paste(rep("1", n_assets), collapse = ","),
-      input$max_weight
+    # Set up constraints using proper format
+    constraints <- paste(
+      "box", 
+      paste(rep(input$min_weight, ncol(data)), collapse = " "),
+      paste(rep(input$max_weight, ncol(data)), collapse = " "),
+      "eqsumw",
+      sep = "\n"
     )
     
     # Perform optimization
