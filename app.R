@@ -52,7 +52,7 @@ server <- function(input, output, session) {
     returns_list <- lapply(input$stocks, function(symbol) {
       tryCatch({
         prices <- getSymbols(symbol, src = "yahoo", auto.assign = FALSE,
-                             from = Sys.Date() - 365, to = Sys.Date())
+                            from = Sys.Date() - 365, to = Sys.Date())
         returns <- dailyReturn(prices)
         returns
       }, error = function(e) NULL)
@@ -66,19 +66,23 @@ server <- function(input, output, session) {
   
   # Create portfolio specification
   getSpec <- reactive({
+    # Create basic specification
     spec <- portfolioSpec()
     
-    # Set basic portfolio parameters
-    setNFrontierPoints(spec) <- 25
-    setRiskFreeRate(spec) <- 0.02
-    setRiskAversion(spec) <- input$risk_aversion
-    
-    # Set Rsymphony as the optimizer
-    setOptimizer(spec) <- "solveRsymphony"
-    setOptioControl(spec) <- list(
-      solver = "symphony",
-      maxiter = 1000,
-      trace = TRUE
+    # Modify specification settings directly
+    spec@nFrontierPoints <- 25
+    spec@risk <- list(
+      risk = "Cov",
+      riskFreeRate = 0.02,
+      riskAversion = input$risk_aversion
+    )
+    spec@optimizer <- list(
+      type = "solveRsymphony",
+      control = list(
+        solver = "symphony",
+        maxiter = 1000,
+        trace = TRUE
+      )
     )
     
     spec
@@ -91,8 +95,8 @@ server <- function(input, output, session) {
     
     # Create constraints string
     constraints <- paste0("minW[1:length(input$stocks)]=", input$min_weight,
-                          "; maxW[1:length(input$stocks)]=", input$max_weight,
-                          "; sum(weights)=1")
+                         "; maxW[1:length(input$stocks)]=", input$max_weight,
+                         "; sum(weights)=1")
     
     # Perform optimization
     tryCatch({
